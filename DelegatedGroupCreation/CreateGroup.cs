@@ -49,10 +49,18 @@ namespace DelegatedGroupCreation
                                                                                                     clientSecret, () => userToken);
 
       string accessToken = await onBehalfAuthProvider.GetAccessTokenAsync(new Uri("https://graph.microsoft.com"));
-      GraphController graphController = new GraphController(accessToken);
+      GraphController graphController = new GraphController(accessToken, log);
 
       UnifiedGroup response = await graphController.CreateGroup(groupName);
       string siteUrl = await graphController.GetSiteUrl(response.id);
+      using (var pnpContext = await pnpContextFactory.CreateAsync(new System.Uri(siteUrl), onBehalfAuthProvider))
+      {
+        var webId = pnpContext.Web.Id;
+        var siteId = pnpContext.Site.Id;
+        response.siteID = siteId.ToString();
+        response.webID = webId.ToString();
+      }
+
       response.siteUrl = siteUrl;
       return new OkObjectResult(response);
     }
