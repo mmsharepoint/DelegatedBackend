@@ -59,6 +59,10 @@ namespace DelegatedGroupCreation
         var siteId = pnpContext.Site.Id;
         response.siteID = siteId.ToString();
         response.webID = webId.ToString();
+
+        string spoAccessToken = await pnpContext.AuthenticationProvider.GetAccessTokenAsync(new Uri(siteUrl));
+        SPORestController spoHttpCtrl = new SPORestController(spoAccessToken, log);
+        bool resp = await spoHttpCtrl.DisableTeamify(siteUrl);
       }
 
       response.siteUrl = siteUrl;
